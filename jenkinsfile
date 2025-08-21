@@ -1,0 +1,37 @@
+node {
+    // Define the Maven tool used for the build process
+    def mavenHome = tool name: 'Maven 3.8.6'
+
+    // Configure build properties (e.g., log rotation and SCM polling)
+    properties([
+        buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5')),
+        pipelineTriggers([pollSCM('* * * * *')])
+    ])
+
+    // Checkout code from the Git repository
+    stage('Checkout Code') {
+        git branch: 'development', credentialsId: 'github-credentials-id', url: 'https://github.com/your-username/your-repository.git'
+    }
+
+    // Build the project using Maven
+    stage('Build') {
+        sh "${mavenHome}/bin/mvn clean package"
+    }
+
+    // Execute code quality analysis with SonarQube
+    stage('Execute SonarQube Analysis') {
+        sh "${mavenHome}/bin/mvn clean sonar:sonar"
+    }
+
+    // Upload the build artifact to Nexus repository
+    stage('Upload Build Artifact') {
+        sh "${mavenHome}/bin/mvn clean deploy"
+    }
+
+    // Deploy the application to Tomcat using SCP
+    stage('Deploy to Tomcat') {
+        sshagent(['your-ssh-credentials-id']) {
+            sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@your-server:/opt/apache-tomcat-9.0.64/webapps/"
+        }
+    }
+}
