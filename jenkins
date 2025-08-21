@@ -1,0 +1,29 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/Uppunuthalaswathi/Devops_Lab.git'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                bat 'dir'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                bat 'if exist index.html (echo index.html found ✅) else (exit /b 1)'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo 'Deploy step (not configured yet)'
+            }
+        }
+    }
+}
