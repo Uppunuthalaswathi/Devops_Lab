@@ -2,28 +2,46 @@ pipeline {
     agent any
 
     stages {
-        stage('Checkout') {
+        stage('Checkout SCM') {
             steps {
-                git branch: 'main', url: 'https://github.com/Uppunuthalaswathi/Devops_Lab.git'
+                checkout scm
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                sh 'npm install'
             }
         }
 
         stage('Build') {
             steps {
-                bat 'dir'
+                sh 'npm run build'
             }
         }
 
         stage('Test') {
             steps {
-                bat 'if exist index.html (echo index.html found ✅) else (exit /b 1)'
+                sh 'npm test'
             }
         }
 
         stage('Deploy') {
             steps {
-                echo 'Deploy step (not configured yet)'
+                echo 'Deploying application...'
+                // Example:
+                // sh './deploy.sh'
             }
         }
     }
+    
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed. Please check logs.'
+        }
+    }
 }
+
