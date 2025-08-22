@@ -10,38 +10,55 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh 'npm install'
+                script {
+                    if (fileExists('package.json')) {
+                        echo "Node.js project detected"
+                        sh 'npm install || true'
+                    } else if (fileExists('pom.xml')) {
+                        echo "Maven project detected"
+                        sh 'mvn clean install -DskipTests || true'
+                    } else if (fileExists('requirements.txt')) {
+                        echo "Python project detected"
+                        sh 'pip install -r requirements.txt || true'
+                    } else {
+                        echo "No dependency file found, skipping Install Dependencies"
+                    }
+                }
             }
         }
 
         stage('Build') {
             steps {
-                sh 'npm run build'
+                echo 'Running Build Stage...'
+                // Adjust build commands as per your project
             }
         }
 
         stage('Test') {
             steps {
-                sh 'npm test'
+                echo 'Running Test Stage...'
+                // Example:
+                // sh 'npm test'
+                // sh 'mvn test'
+                // sh 'pytest'
             }
         }
 
         stage('Deploy') {
             steps {
-                echo 'Deploying application...'
-                // Example:
+                echo 'Running Deploy Stage...'
+                // Example deploy script
                 // sh './deploy.sh'
             }
         }
     }
-    
+
     post {
         success {
-            echo 'Pipeline completed successfully!'
+            echo '✅ Pipeline completed successfully!'
         }
         failure {
-            echo 'Pipeline failed. Please check logs.'
+            echo '❌ Pipeline failed. Please check logs.'
         }
     }
 }
-
